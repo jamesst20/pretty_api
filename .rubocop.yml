@@ -1,0 +1,111 @@
+inherit_gem:
+  rubocop-rails-omakase: rubocop.yml
+
+inherit_mode:
+  merge:
+    - Exclude
+
+require:
+  - rubocop-rails
+  - rubocop-performance
+  - rubocop-rspec
+
+AllCops:
+  DisabledByDefault: false
+  DisplayCopNames: true
+  NewCops: enable
+  Exclude:
+    - config/initializers/devise.rb
+    - lib/templates/**/*
+    - public/**/*
+
+FactoryBot/ConsistentParenthesesStyle:
+  EnforcedStyle: omit_parentheses
+
+Layout/LineLength:
+  Exclude:
+    - config/initializers/simple_form_bootstrap.rb
+
+Layout/SpaceInsideArrayLiteralBrackets:
+  Enabled: true
+  EnforcedStyle: no_space
+  EnforcedStyleForEmptyBrackets: no_space
+
+Lint/EmptyBlock:
+  Enabled: false
+
+Lint/UnusedBlockArgument:
+  Enabled: false
+
+Metrics/AbcSize:
+  Max: 20
+  Exclude:
+    - db/migrate/**/*
+    - db/seed/**/*
+
+Metrics/BlockLength:
+  Enabled: false
+
+Metrics/CyclomaticComplexity:
+  Max: 10
+
+Metrics/MethodLength:
+  Exclude:
+    - db/migrate/**/*
+    - null
+
+Metrics/PerceivedComplexity:
+  Max: 10
+
+RSpec/AnyInstance:
+  Enabled: false
+
+RSpec/EmptyExampleGroup:
+  Enabled: false
+
+RSpec/ExampleLength:
+  Max: 10
+
+RSpec/MultipleMemoizedHelpers:
+  Enabled: false
+
+RSpec/NestedGroups:
+  Enabled: false
+
+RSpec/RepeatedExample:
+  Enabled: false
+
+Rails/NotNullColumn:
+  Enabled: false
+
+Rails/OutputSafety:
+  Exclude:
+    - app/decorators/**/*
+    - app/helpers/**/*
+
+Style/Documentation:
+  Enabled: false
+
+Style/EmptyMethod:
+  EnforcedStyle: expanded
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+Layout/IndentationConsistency:
+  Enabled: true
+  EnforcedStyle: normal
+
+Layout/IndentationWidth:
+  Enabled: true
+  Width: 2
+
+Layout/MultilineMethodCallIndentation:
+  Enabled: true
+  EnforcedStyle: indented_relative_to_receiver
+
+Gemspec/RequireMFA:
+  Enabled: false
