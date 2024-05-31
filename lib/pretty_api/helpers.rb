@@ -4,9 +4,11 @@ module PrettyApi
 
     included do
       def pretty_nested_attributes(record, params, attrs = nil)
+        params = params.to_h.with_indifferent_access
+
         attrs ||= PrettyApi::ActiveRecord::Associations.nested_attributes_associations(record.class)
 
-        PrettyApi::Parameters::NestedAttributes.parse_nested_attributes(record, params.dup, attrs)
+        PrettyApi::Parameters::NestedAttributes.parse_nested_attributes(record, params, attrs)
       end
 
       def pretty_nested_errors(record, attrs = nil)
