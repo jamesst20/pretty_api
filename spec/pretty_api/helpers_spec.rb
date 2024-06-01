@@ -67,6 +67,32 @@ RSpec.describe PrettyApi::Helpers do
 
             it { expect(helper.call(record, params)).to eq_hash(params) }
           end
+
+          context "when implicitly remove items in wrong order" do
+            let(:record) do
+              create :organization,
+                     services: [build(:service, phones: [build(:phone), build(:phone)]),
+                                build(:service, phones: [build(:phone), build(:phone)])]
+            end
+
+            let(:params) do
+              { services: [{ id: record.services[1].id },
+                           { id: record.services[0].id, phones: [{ id: record.services[0].phones[1].id }] }] }
+            end
+
+            let(:expected) do
+              {
+                services_attributes: [
+                  { id: record.services[1].id },
+                  { id: record.services[0].id,
+                    phones_attributes: [{ id: record.services[0].phones[1].id },
+                                        { id: record.services[0].phones[0].id, _destroy: true }] }
+                ]
+              }
+            end
+
+            it { expect(helper.call(record, params)).to eq_hash(expected) }
+          end
         end
 
         context "with has_one association" do

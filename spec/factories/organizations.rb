@@ -1,5 +1,7 @@
 FactoryBot.define do
   factory :organization do
+    user
+
     sequence(:name) { |n| "Organization #{n}" }
 
     trait :with_company_car do

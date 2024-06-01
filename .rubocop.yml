@@ -50,6 +50,7 @@ Metrics/CyclomaticComplexity:
   Max: 10
 
 Metrics/MethodLength:
+  Max: 15
   Exclude:
     - db/migrate/**/*
     - null

@@ -18,7 +18,9 @@ ActiveRecord::Schema[7.1].define(version: 20_240_531_052_651) do
   end
 
   create_table "organizations", force: :cascade do |t|
+    t.integer "user_id", null: false
     t.string "name"
+    t.index ["user_id"], name: "index_organizations_on_user_id"
   end
 
   create_table "phones", force: :cascade do |t|
@@ -33,6 +35,14 @@ ActiveRecord::Schema[7.1].define(version: 20_240_531_052_651) do
     t.index ["organization_id"], name: "index_services_on_organization_id"
   end
 
+  create_table "users", force: :cascade do |t|
+    t.string "name"
+    t.integer "parent_id"
+    t.index ["parent_id"], name: "index_users_on_parent_id"
+  end
+
+  add_foreign_key "organizations", "users"
   add_foreign_key "phones", "services"
   add_foreign_key "services", "organizations"
+  add_foreign_key "users", "users", column: "parent_id"
 end

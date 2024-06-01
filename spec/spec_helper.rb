@@ -10,6 +10,7 @@ require_relative "app/models/company_car"
 require_relative "app/models/organization"
 require_relative "app/models/phone"
 require_relative "app/models/service"
+require_relative "app/models/user"
 
 ActiveRecord::Base.establish_connection adapter: "sqlite3", database: ":memory:"
 load "#{File.dirname(__FILE__)}/app/db/schema.rb"

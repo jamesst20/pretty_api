@@ -4,13 +4,14 @@ module PrettyApi
       def self.parse_nested_attributes(record, params, attrs)
         return {} if params.blank?
 
-        if [Hash, Array].include?(attrs.class)
+        case attrs
+        when Hash, Array
           parse_deep_nested_attributes(record, params, attrs)
-        elsif params.is_a? Array
-          params.each_with_index { |p, i| parse_nested_attributes record.try(:[], i), p, attrs }
-        elsif params.key?(attrs)
-          include_associations_to_destroy(record, params, attrs)
-          params["#{attrs}_attributes"] = params.delete attrs
+        when String, Symbol
+          if params.key?(attrs)
+            include_associations_to_destroy(record, params, attrs)
+            params["#{attrs}_attributes"] = params.delete(attrs)
+          end
         end
 
         params
@@ -19,13 +20,29 @@ module PrettyApi
       def self.parse_deep_nested_attributes(record, params, attrs)
         case attrs
         when Hash
-          attrs.each do |key, value|
-            parse_nested_attributes record.try(key), params[key], value
-            parse_nested_attributes record, params, key
+          attrs.each do |assoc_key, nested_assoc|
+            if params[assoc_key].is_a? Array
+              parse_has_many_association(record, params, assoc_key, nested_assoc)
+            else
+              parse_has_one_association(record, params, assoc_key, nested_assoc)
+            end
+            parse_nested_attributes(record, params, assoc_key)
           end
         when Array
-          attrs.each { |value| parse_nested_attributes record, params, value }
+          attrs.each { |assoc_or_nested_assoc| parse_nested_attributes(record, params, assoc_or_nested_assoc) }
         end
+      end
+
+      def self.parse_has_many_association(record, params, assoc_key, nested_assoc)
+        params[assoc_key].each do |p|
+          assoc_primary_key = record.try(:class).try(:primary_key)
+          assoc = record.try(assoc_key).try(:detect) { |r| r.try(assoc_primary_key) == p[assoc_primary_key] }
+          parse_nested_attributes(assoc, p, nested_assoc)
+        end
+      end
+
+      def self.parse_has_one_association(record, params, assoc_key, nested_assoc)
+        parse_nested_attributes(record.try(assoc_key), params[assoc_key], nested_assoc)
       end
 
       def self.include_associations_to_destroy(record, params, attr)

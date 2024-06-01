@@ -4,7 +4,7 @@ class OrganizationsController
   def put(params)
     organization = Organization.find(params[:organization][:id])
 
-    result = record_params(organization, params.with_indifferent_access)
+    result = record_params(organization, params)
     organization.assign_attributes(result)
     organization.save!
   end
