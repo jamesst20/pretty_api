@@ -11,42 +11,43 @@ module PrettyApi
         PrettyApi::Utils::Hash.deep_compact_blank(errors)
       end
 
-      def self.parse_deep_nested_errors(record, attrs, result)
+      def self.parse_deep_nested_errors(record, attrs, result, parent_record = nil)
         case attrs
         when Hash
           attrs.each do |key, value|
-            parse_association_errors(record, key, value, result)
+            parse_association_errors(record, key, value, result, parent_record)
           end
         when Array
-          attrs.each { |value| parse_deep_nested_errors record, value, result }
+          attrs.each { |value| parse_deep_nested_errors record, value, result, parent_record }
         else
-          parse_association_errors(record, attrs, nil, result)
+          parse_association_errors(record, attrs, nil, result, parent_record)
         end
       end
 
-      def self.parse_association_errors(record, attr, nested_attrs = nil, result)
-        associations = record.send(attr)
+      def self.parse_association_errors(record, attr, nested_attrs, result, parent_record)
+        association = record.send(attr)
 
-        return if associations.blank?
+        return if association.blank?
+        return if association == parent_record
 
-        if associations.respond_to? :to_a
-          parse_has_many_errors(associations, attr, nested_attrs, result)
+        if association.respond_to? :to_a
+          parse_has_many_errors(record, association, attr, nested_attrs, result)
         else
-          parse_has_one_errors(associations, attr, nested_attrs, result)
+          parse_has_one_errors(record, association, attr, nested_attrs, result)
         end
       end
 
-      def self.parse_has_many_errors(associations, attr, nested_attrs = nil, result)
+      def self.parse_has_many_errors(record, associations, attr, nested_attrs, result)
         result[attr] = {}
         associations.each_with_index do |association, i|
           result[attr][i] = record_only_errors(association)
-          parse_deep_nested_errors association, nested_attrs, result[attr][i] if nested_attrs.present?
+          parse_deep_nested_errors association, nested_attrs, result[attr][i], record if nested_attrs.present?
         end
       end
 
-      def self.parse_has_one_errors(association, attr, nested_attrs = nil, result)
+      def self.parse_has_one_errors(record, association, attr, nested_attrs, result)
         result[attr] = record_only_errors(association)
-        parse_deep_nested_errors association, nested_attrs, result[attr] if nested_attrs.present?
+        parse_deep_nested_errors association, nested_attrs, result[attr], record if nested_attrs.present?
       end
 
       def self.record_only_errors(record)
