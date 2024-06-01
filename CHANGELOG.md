@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+## [0.3.1] - 2024-06-01
+
+- Fix possible "Unitialized Constant" error when inferring association classes that are namespaced
+
 ## [0.3.0] - 2024-06-01
 
 - Support for ActionController::Parameters from Rails
