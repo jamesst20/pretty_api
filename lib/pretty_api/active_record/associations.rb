@@ -6,7 +6,7 @@ module PrettyApi
           result[model] ||= {}
 
           association = attribute_association(model, association_name)
-          association_class = association.class_name.constantize
+          association_class = association.klass
 
           result[model][association_name] = {
             model: association_class,
