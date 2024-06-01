@@ -1,56 +1,53 @@
 module PrettyApi
   module Errors
     class NestedErrors
-      def self.parsed_nested_errors(record, attrs)
+      def initialize(nested_tree:)
+        @nested_tree = nested_tree
+      end
+
+      def parse(record)
         errors = record_only_errors(record)
 
-        return errors if attrs.blank?
+        return errors if nested_tree.blank?
 
-        parse_deep_nested_errors(record, attrs, errors)
+        parse_deep_nested_errors(record, nested_tree[record.class], errors)
 
         PrettyApi::Utils::Hash.deep_compact_blank(errors)
       end
 
-      def self.parse_deep_nested_errors(record, attrs, result, parent_record = nil)
-        case attrs
-        when Hash
-          attrs.each do |key, value|
-            parse_association_errors(record, key, value, result, parent_record)
+      private
+
+      attr_reader :nested_tree
+
+      def parse_deep_nested_errors(record, attrs, result, parent_record = nil)
+        attrs.each do |assoc_key, assoc_info|
+          association = record.send(assoc_key)
+
+          next if association.blank?
+          next if association == parent_record
+
+          if association.respond_to? :to_a
+            parse_has_many_errors(record, association, assoc_key, assoc_info, result)
+          else
+            parse_has_one_errors(record, association, assoc_key, assoc_info, result)
           end
-        when Array
-          attrs.each { |value| parse_deep_nested_errors record, value, result, parent_record }
-        else
-          parse_association_errors(record, attrs, nil, result, parent_record)
         end
       end
 
-      def self.parse_association_errors(record, attr, nested_attrs, result, parent_record)
-        association = record.send(attr)
-
-        return if association.blank?
-        return if association == parent_record
-
-        if association.respond_to? :to_a
-          parse_has_many_errors(record, association, attr, nested_attrs, result)
-        else
-          parse_has_one_errors(record, association, attr, nested_attrs, result)
-        end
-      end
-
-      def self.parse_has_many_errors(record, associations, attr, nested_attrs, result)
-        result[attr] = {}
+      def parse_has_many_errors(record, associations, assoc_key, assoc_info, result)
+        result[assoc_key] = {}
         associations.each_with_index do |association, i|
-          result[attr][i] = record_only_errors(association)
-          parse_deep_nested_errors association, nested_attrs, result[attr][i], record if nested_attrs.present?
+          result[assoc_key][i] = record_only_errors(association)
+          parse_deep_nested_errors association, nested_tree[assoc_info[:model]], result[assoc_key][i], record
         end
       end
 
-      def self.parse_has_one_errors(record, association, attr, nested_attrs, result)
-        result[attr] = record_only_errors(association)
-        parse_deep_nested_errors association, nested_attrs, result[attr], record if nested_attrs.present?
+      def parse_has_one_errors(record, association, assoc_key, assoc_info, result)
+        result[assoc_key] = record_only_errors(association)
+        parse_deep_nested_errors association, nested_tree[assoc_info[:model]], result[assoc_key], record
       end
 
-      def self.record_only_errors(record)
+      def record_only_errors(record)
         record.errors.as_json.reject { |k, _v| k.to_s.include?(".") }
       end
     end

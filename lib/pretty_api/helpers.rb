@@ -8,13 +8,13 @@ module PrettyApi
 
         attrs ||= PrettyApi::ActiveRecord::Associations.nested_attributes_tree(record.class)
 
-        PrettyApi::Parameters::NestedAttributes.parse_nested_attributes(record, params, attrs)
+        PrettyApi::Parameters::NestedAttributes.new(nested_tree: attrs).parse(record, params)
       end
 
       def pretty_nested_errors(record, attrs = nil)
         attrs ||= PrettyApi::ActiveRecord::Associations.nested_attributes_tree(record.class)
 
-        PrettyApi::Errors::NestedErrors.parsed_nested_errors(record, attrs)
+        PrettyApi::Errors::NestedErrors.new(nested_tree: attrs).parse(record)
       end
     end
   end

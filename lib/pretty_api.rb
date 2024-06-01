@@ -11,7 +11,4 @@ require_relative "pretty_api/parameters/nested_attributes"
 module PrettyApi
   singleton_class.attr_accessor :destroy_missing_associations
   self.destroy_missing_associations = true
-
-  singleton_class.attr_accessor :max_nested_attributes_depth
-  self.max_nested_attributes_depth = 1
 end
