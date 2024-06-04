@@ -42,9 +42,7 @@ module PrettyApi
 
         (params[assoc_key] || []).each do |p|
           assoc_primary_key = record.try(:class).try(:primary_key)
-          assoc = record.try(assoc_key).try(:detect) do |r|
-            r.try(assoc_primary_key) == p[assoc_primary_key]
-          end
+          assoc = record.try(assoc_key).try(:detect) { |r| r.try(assoc_primary_key) == p[assoc_primary_key] }
           parse_nested_attributes(assoc, p, nested_tree[assoc_info[:model]])
         end
       end

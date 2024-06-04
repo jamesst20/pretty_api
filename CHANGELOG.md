@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+## [0.4.0] - 2024-06-04
+
+- Add support for www-form-urlencoded / multipart format: Fix "No implicit conversion of String into Integer"
+
 ## [0.3.1] - 2024-06-01
 
 - Fix possible "Unitialized Constant" error when inferring association classes that are namespaced

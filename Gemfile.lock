@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    pretty-api (0.3.1)
+    pretty-api (0.4.0)
       rails (~> 7.0)
 
 GEM
