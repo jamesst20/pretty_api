@@ -37,9 +37,14 @@ module PrettyApi
       end
 
       def parse_has_many_association(record, params, assoc_key, assoc_info)
+        # www-form-urlencoded / multipart-form-data
+        params[assoc_key] = params[assoc_key].values if params[assoc_key].is_a?(Hash)
+
         (params[assoc_key] || []).each do |p|
           assoc_primary_key = record.try(:class).try(:primary_key)
-          assoc = record.try(assoc_key).try(:detect) { |r| r.try(assoc_primary_key) == p[assoc_primary_key] }
+          assoc = record.try(assoc_key).try(:detect) do |r|
+            r.try(assoc_primary_key) == p[assoc_primary_key]
+          end
           parse_nested_attributes(assoc, p, nested_tree[assoc_info[:model]])
         end
       end

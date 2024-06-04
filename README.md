@@ -30,7 +30,7 @@ Exemple with an organization that has 2 services. Let's say we would like to upd
 
 ### With PrettyAPI
 
-You can omit `_attributes` from your attributes and you can omit everything that you would like to destroy as well.
+You can omit `_attributes` from your attributes and you can omit `everything that you would like to destroy` as well.
 
 ```json
 {
@@ -56,6 +56,23 @@ More exemples
   
   organization: {
     // Fully omit "services" attribute to leave as is
+  }
+}
+```
+
+Support baked for www-form-urlencoded / multipart format. Services will be converted internally to an array discarding
+all superfluous indexes.
+
+```json
+{
+  "organization": {
+    "id": 1,
+    "services": {
+      "0": {
+        "id": 2,
+        "name": "Service to update"
+      }
+    }
   }
 }
 ```

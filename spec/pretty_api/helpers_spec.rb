@@ -27,66 +27,149 @@ RSpec.describe PrettyApi::Helpers do
     end
 
     context "with default model reflections" do
-      context "with empty attributes" do
-        it { expect(helper.call(record, {})).to eq_hash({}) }
-      end
+      context "with typical json format" do
+        context "with empty attributes" do
+          it { expect(helper.call(record, {})).to eq_hash({}) }
+        end
 
-      context "with basic attributes" do
-        let(:params) { { name: "Test" } }
+        context "with basic attributes" do
+          let(:params) { { name: "Test" } }
 
-        it { expect(helper.call(record, params)).to eq_hash(params) }
-      end
+          it { expect(helper.call(record, params)).to eq_hash(params) }
+        end
 
-      context "with nested attributes" do
-        context "with has_many association" do
+        context "with nested attributes" do
+          context "with has_many association" do
+            context "when adding new item" do
+              let(:params) { { name: "Test", services: [{ name: "New service" }] } }
+              let(:expected) { { name: "Test", services_attributes: [{ name: "New service" }] } }
+
+              it { expect(helper.call(record, params)).to eq_hash(expected) }
+            end
+
+            context "when implicitly removing item" do
+              let(:record) { create :organization, :with_service }
+              let(:params) { { name: "Test", services: [] } }
+              let(:expected) do
+                { name: "Test", services_attributes: [{ id: record.services.first.id, _destroy: true }] }
+              end
+
+              it { expect(helper.call(record, params)).to eq_hash(expected) }
+            end
+
+            context "when explicitly removing item" do
+              let(:record) { create :organization, :with_service }
+              let(:params) { { name: "Test", services_attributes: [{ id: record.services.first.id, _destroy: true }] } }
+
+              it { expect(helper.call(record, params)).to eq_hash(params) }
+            end
+
+            context "when doing nothing" do
+              let(:record) { create :organization, :with_service }
+              let(:params) { { name: "Test" } }
+
+              it { expect(helper.call(record, params)).to eq_hash(params) }
+            end
+
+            context "when implicitly remove items in wrong order" do
+              let(:record) do
+                create :organization,
+                       services: [build(:service, phones: [build(:phone), build(:phone)]),
+                                  build(:service, phones: [build(:phone), build(:phone)])]
+              end
+
+              let(:params) do
+                { services: [{ id: record.services[1].id },
+                             { id: record.services[0].id, phones: [{ id: record.services[0].phones[1].id }] }] }
+              end
+
+              let(:expected) do
+                {
+                  services_attributes: [
+                    { id: record.services[1].id },
+                    { id: record.services[0].id,
+                      phones_attributes: [{ id: record.services[0].phones[1].id },
+                                          { id: record.services[0].phones[0].id, _destroy: true }] }
+                  ]
+                }
+              end
+
+              it { expect(helper.call(record, params)).to eq_hash(expected) }
+            end
+          end
+
+          context "with has_one association" do
+            context "when adding new item" do
+              let(:params) { { name: "Test", company_car: { name: "New car" } } }
+              let(:expected) { { name: "Test", company_car_attributes: { name: "New car" } } }
+
+              it { expect(helper.call(record, params)).to eq_hash(expected) }
+            end
+
+            context "when implicitly removing item" do
+              let(:record) { create :organization, :with_company_car }
+              let(:params) { { name: "Test", company_car: nil } }
+              let(:expected) { { name: "Test", company_car_attributes: { id: record.company_car.id, _destroy: true } } }
+
+              it { expect(helper.call(record, params)).to eq_hash(expected) }
+            end
+
+            context "when explicitly removing item" do
+              let(:record) { create :organization, :with_company_car }
+              let(:params) { { name: "Test", company_car_attributes: { id: record.company_car, _destroy: true } } }
+
+              it { expect(helper.call(record, params)).to eq_hash(params) }
+            end
+
+            context "when doing nothing" do
+              let(:record) { create :organization, :with_company_car }
+              let(:params) { { name: "Test" } }
+
+              it { expect(helper.call(record, params)).to eq_hash(params) }
+            end
+          end
+
+          context "with belongs_to association" do
+            let(:record) { create :company_car }
+
+            context "when updating an item" do
+              let(:params) { { organization: { id: record.organization_id, name: "New name" } } }
+              let(:expected) { { organization_attributes: { id: record.organization_id, name: "New name" } } }
+
+              it { expect(helper.call(record, params)).to eq_hash(expected) }
+            end
+
+            context "when implicitly removing item" do
+              let(:params) { { organization: nil } }
+              let(:expected) { { organization_attributes: { id: record.organization_id, _destroy: true } } }
+
+              it { expect(helper.call(record, params)).to eq_hash(expected) }
+            end
+
+            context "when explicitly removing item" do
+              let(:params) { { organization_attributes: { id: record.organization_id, _destroy: true } } }
+
+              it { expect(helper.call(record, params)).to eq_hash(params) }
+            end
+
+            context "when doing nothing" do
+              let(:params) { { brand: "Test" } }
+
+              it { expect(helper.call(record, params)).to eq_hash(params) }
+            end
+          end
+        end
+
+        context "with deep nested attributes" do
           context "when adding new item" do
-            let(:params) { { name: "Test", services: [{ name: "New service" }] } }
-            let(:expected) { { name: "Test", services_attributes: [{ name: "New service" }] } }
-
-            it { expect(helper.call(record, params)).to eq_hash(expected) }
-          end
-
-          context "when implicitly removing item" do
-            let(:record) { create :organization, :with_service }
-            let(:params) { { name: "Test", services: [] } }
-            let(:expected) { { name: "Test", services_attributes: [{ id: record.services.first.id, _destroy: true }] } }
-
-            it { expect(helper.call(record, params)).to eq_hash(expected) }
-          end
-
-          context "when explicitly removing item" do
-            let(:record) { create :organization, :with_service }
-            let(:params) { { name: "Test", services_attributes: [{ id: record.services.first.id, _destroy: true }] } }
-
-            it { expect(helper.call(record, params)).to eq_hash(params) }
-          end
-
-          context "when doing nothing" do
-            let(:record) { create :organization, :with_service }
-            let(:params) { { name: "Test" } }
-
-            it { expect(helper.call(record, params)).to eq_hash(params) }
-          end
-
-          context "when implicitly remove items in wrong order" do
-            let(:record) do
-              create :organization,
-                     services: [build(:service, phones: [build(:phone), build(:phone)]),
-                                build(:service, phones: [build(:phone), build(:phone)])]
-            end
-
-            let(:params) do
-              { services: [{ id: record.services[1].id },
-                           { id: record.services[0].id, phones: [{ id: record.services[0].phones[1].id }] }] }
-            end
-
+            let(:record) { create :organization, :with_service_and_phone }
+            let(:service) { record.services.first }
+            let(:phone) { service.phones.first }
+            let(:params) { { services: [{ id: service.id, phones: [{ number: "123" }] }] } }
             let(:expected) do
               {
                 services_attributes: [
-                  { id: record.services[1].id },
-                  { id: record.services[0].id,
-                    phones_attributes: [{ id: record.services[0].phones[1].id },
-                                        { id: record.services[0].phones[0].id, _destroy: true }] }
+                  { id: service.id, phones_attributes: [{ number: "123" }, { id: phone.id, _destroy: true }] }
                 ]
               }
             end
@@ -94,81 +177,25 @@ RSpec.describe PrettyApi::Helpers do
             it { expect(helper.call(record, params)).to eq_hash(expected) }
           end
         end
-
-        context "with has_one association" do
-          context "when adding new item" do
-            let(:params) { { name: "Test", company_car: { name: "New car" } } }
-            let(:expected) { { name: "Test", company_car_attributes: { name: "New car" } } }
-
-            it { expect(helper.call(record, params)).to eq_hash(expected) }
-          end
-
-          context "when implicitly removing item" do
-            let(:record) { create :organization, :with_company_car }
-            let(:params) { { name: "Test", company_car: nil } }
-            let(:expected) { { name: "Test", company_car_attributes: { id: record.company_car.id, _destroy: true } } }
-
-            it { expect(helper.call(record, params)).to eq_hash(expected) }
-          end
-
-          context "when explicitly removing item" do
-            let(:record) { create :organization, :with_company_car }
-            let(:params) { { name: "Test", company_car_attributes: { id: record.company_car, _destroy: true } } }
-
-            it { expect(helper.call(record, params)).to eq_hash(params) }
-          end
-
-          context "when doing nothing" do
-            let(:record) { create :organization, :with_company_car }
-            let(:params) { { name: "Test" } }
-
-            it { expect(helper.call(record, params)).to eq_hash(params) }
-          end
-        end
-
-        context "with belongs_to association" do
-          let(:record) { create :company_car }
-
-          context "when updating an item" do
-            let(:params) { { organization: { id: record.organization_id, name: "New name" } } }
-            let(:expected) { { organization_attributes: { id: record.organization_id, name: "New name" } } }
-
-            it { expect(helper.call(record, params)).to eq_hash(expected) }
-          end
-
-          context "when implicitly removing item" do
-            let(:params) { { organization: nil } }
-            let(:expected) { { organization_attributes: { id: record.organization_id, _destroy: true } } }
-
-            it { expect(helper.call(record, params)).to eq_hash(expected) }
-          end
-
-          context "when explicitly removing item" do
-            let(:params) { { organization_attributes: { id: record.organization_id, _destroy: true } } }
-
-            it { expect(helper.call(record, params)).to eq_hash(params) }
-          end
-
-          context "when doing nothing" do
-            let(:params) { { brand: "Test" } }
-
-            it { expect(helper.call(record, params)).to eq_hash(params) }
-          end
-        end
       end
 
-      context "with deep nested attributes" do
-        context "when adding new item" do
-          let(:record) { create :organization, :with_service_and_phone }
-          let(:service) { record.services.first }
-          let(:phone) { service.phones.first }
-          let(:params) { { services: [{ id: service.id, phones: [{ number: "123" }] }] } }
+      context "with hash format (typically form-urlencoded or multipart/form-data)" do
+        context "when implicitly removing item and adding items" do
+          let(:record) { create :organization, :with_service }
+          let(:params) do
+            { name: "Test", services: {
+              "1234" => { name: "New service 1", phones: { "0" => { number: "123" } } },
+              "9876" => { name: "New service 2" }
+            } }
+          end
+
           let(:expected) do
-            {
+            { name: "Test",
               services_attributes: [
-                { id: service.id, phones_attributes: [{ number: "123" }, { id: phone.id, _destroy: true }] }
-              ]
-            }
+                { name: "New service 1", phones_attributes: [{ number: "123" }] },
+                { name: "New service 2" },
+                { id: record.services.first.id, _destroy: true }
+              ] }
           end
 
           it { expect(helper.call(record, params)).to eq_hash(expected) }
