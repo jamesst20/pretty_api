@@ -177,6 +177,16 @@ RSpec.describe PrettyApi::Helpers do
             it { expect(helper.call(record, params)).to eq_hash(expected) }
           end
         end
+
+        context "without associations" do
+          let(:record) { create :phone }
+          let(:params) { { id: record.id, number: "456" } }
+          let(:expected) do
+            { id: record.id, number: "456" }
+          end
+
+          it { expect(helper.call(record, params)).to eq_hash(expected) }
+        end
       end
 
       context "with hash format (typically form-urlencoded or multipart/form-data)" do

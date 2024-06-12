@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+## [0.4.1] - 2024-06-04
+
+- Fix `undefined method `each' for nil` when PrettyAPI is used on record that doesn't have associations
+
 ## [0.4.0] - 2024-06-04
 
 - Add support for www-form-urlencoded / multipart format: Fix "No implicit conversion of String into Integer"

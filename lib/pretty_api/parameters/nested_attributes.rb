@@ -6,6 +6,8 @@ module PrettyApi
       end
 
       def parse(record, params)
+        return params if nested_tree[record.class].blank?
+
         parse_nested_attributes(record, params, nested_tree[record.class])
       end
 
