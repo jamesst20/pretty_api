@@ -11,6 +11,7 @@ gem "sqlite3", "< 2.0"
 gem "standalone_migrations"
 
 gem "rubocop"
+gem "rubocop-factory_bot"
 gem "rubocop-performance"
 gem "rubocop-rails_config"
 gem "rubocop-rails-omakase"

@@ -1,28 +1,24 @@
 require "spec_helper"
 
 RSpec.describe PrettyApi::Helpers do
-  let(:helper) do
-    klass = Class.new { include PrettyApi::Helpers }.new
+  subject(:klass) { Class.new { include PrettyApi::Helpers } }
 
-    original = klass.method(:pretty_nested_attributes)
-
-    allow(klass).to receive(:pretty_nested_attributes) do |*args, **kwargs|
-      args[1] = args[1].with_indifferent_access
-      original.call(*args, **kwargs)
-    end
-
-    klass.method(:pretty_nested_attributes)
-  end
-
-  let(:native_helper) { Class.new { include PrettyApi::Helpers }.new.method(:pretty_nested_attributes) }
+  let(:helper) { klass.new.method(:pretty_nested_attributes) }
   let(:record) { build_stubbed :organization }
 
   describe "#pretty_nested_attributes" do
+    context "with method aliases" do
+      let(:instance) { klass.new }
+
+      it { expect(instance.method(:pretty_nested_attributes)).to eq(instance.method(:pretty_attrs)) }
+      it { expect(instance.method(:pretty_nested_errors)).to eq(instance.method(:pretty_errors)) }
+    end
+
     context "with request parameters" do
       let(:params) { { services: [] } }
 
       it "doesn't edit original request parameters" do
-        expect(native_helper.call(record, params)).not_to eq_hash(params)
+        expect(helper.call(record, params)).not_to eq_hash(params)
       end
     end
 

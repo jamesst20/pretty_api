@@ -9,6 +9,7 @@ require:
   - rubocop-rails
   - rubocop-performance
   - rubocop-rspec
+#  - rubocop-factory_bot
 
 AllCops:
   DisabledByDefault: false
@@ -19,8 +20,8 @@ AllCops:
     - lib/templates/**/*
     - public/**/*
 
-FactoryBot/ConsistentParenthesesStyle:
-  EnforcedStyle: omit_parentheses
+#FactoryBot/ConsistentParenthesesStyle:
+#  EnforcedStyle: omit_parentheses
 
 Layout/LineLength:
   Exclude:

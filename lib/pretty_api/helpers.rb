@@ -16,6 +16,9 @@ module PrettyApi
 
         PrettyApi::Errors::NestedErrors.new(nested_tree: attrs).parse(record)
       end
+
+      alias_method :pretty_attrs, :pretty_nested_attributes
+      alias_method :pretty_errors, :pretty_nested_errors
     end
   end
 end

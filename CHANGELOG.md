@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+## [0.5.0] - 2024-06-04
+
+- Add new method aliases: `pretty_attrs` and `pretty_errors`
+
 ## [0.4.1] - 2024-06-04
 
 - Fix `undefined method `each' for nil` when PrettyAPI is used on record that doesn't have associations
