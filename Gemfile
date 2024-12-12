@@ -7,7 +7,7 @@ gem "factory_bot"
 gem "hashdiff"
 gem "rake"
 gem "rspec-rails"
-gem "sqlite3", "< 2.0"
+gem "sqlite3"
 gem "standalone_migrations"
 
 gem "rubocop"

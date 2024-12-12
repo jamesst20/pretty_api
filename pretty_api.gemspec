@@ -23,5 +23,5 @@ Gem::Specification.new do |spec|
   spec.metadata["source_code_uri"] = "https://github.com/jamesst20/pretty_api"
   spec.metadata["changelog_uri"] = "https://github.com/jamesst20/pretty_api/blob/master/CHANGELOG.md"
 
-  spec.add_dependency "rails", "~> 7.0"
+  spec.add_dependency "rails", ">= 7.0", "< 9.0"
 end
