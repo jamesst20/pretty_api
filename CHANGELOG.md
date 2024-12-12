@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+## [0.5.1] - 2024-12-12
+
+- Add Rails 8.0 support
+
 ## [0.5.0] - 2024-06-04
 
 - Add new method aliases: `pretty_attrs` and `pretty_errors`
